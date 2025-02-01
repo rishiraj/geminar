@@ -1,4 +1,3 @@
-# app.py
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 import uuid
 import requests
@@ -8,10 +7,10 @@ import threading
 import time
 import random
 
-# Gemini code (assuming it's in gemini_integration.py)
 from google import genai
 from google.genai import types
 import base64
+import os
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key_here"  # Change this to a strong random key
@@ -32,8 +31,8 @@ def generate_gemini_answer(pdf_url, question):
     try:
         client = genai.Client(
             vertexai=True,
-            project="open-genai",
-            location="us-central1",
+            project=os.environ["GOOGLE_CLOUD_PROJECT"],
+            location=os.environ["GOOGLE_CLOUD_LOCATION"],
         )
 
         document1 = types.Part.from_uri(
