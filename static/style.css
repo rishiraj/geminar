@@ -1,24 +1,27 @@
 /* static/style.css */
+/* static/style.css - Added CSS for student list and small remove button */
 /* Pastel Color Palette */
 :root {
-    --pastel-bg: #f8f9fa;         /* Light gray background */
-    --pastel-primary: #a7c957;     /* Muted green */
-    --pastel-primary-dark: #6a994e; /* Darker muted green for hover */
-    --pastel-secondary: #f2e8cf;   /* Light beige/cream */
-    --pastel-text-dark: #3d405b;    /* Dark text color */
-    --pastel-text-light: #ffffff;   /* Light text color */
-    --pastel-accent-yellow: #f9e79f; /* Soft yellow */
-    --pastel-accent-red: #f2a1a1;    /* Soft red */
-    --pastel-accent-green: #a7d1ab;  /* Soft green */
-    --pastel-gray-border: #dee2e6;   /* Light gray border */
-    --pastel-question-bg: #e9ecef;  /* Slightly darker background for questions */
+    --pastel-bg: #f8f9fa;
+    --pastel-primary: #a7c957;
+    --pastel-primary-dark: #6a994e;
+    --pastel-secondary: #f2e8cf;
+    --pastel-text-dark: #3d405b;
+    --pastel-text-light: #ffffff;
+    --pastel-accent-yellow: #f9e79f;
+    --pastel-accent-red: #f2a1a1;
+    --pastel-accent-green: #a7d1ab;
+    --pastel-gray-border: #dee2e6;
+    --pastel-question-bg: #e9ecef;
+    --solved-question-bg: #d4edda;
+    --solved-badge-color: #28a745;
 }
 
 body {
-    font-family: 'Nunito', sans-serif; /* Beautiful Font */
+    font-family: 'Nunito', sans-serif;
     margin: 0;
     padding: 0;
-    background-color: var(--pastel-bg); /* Pastel background */
+    background-color: var(--pastel-bg);
     color: var(--pastel-text-dark);
     display: flex;
     justify-content: center;
@@ -28,14 +31,14 @@ body {
 }
 
 .container {
-    background-color: var(--pastel-secondary); /* Pastel container background */
+    background-color: var(--pastel-secondary);
     padding: 40px;
-    border-radius: 20px; /* Smooth Rounded Edges */
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1); /* Softer shadow */
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     width: 90%;
     max-width: 950px;
     margin: 30px;
-    animation: fadeIn 1s ease-out forwards; /* Fade-in animation */
+    animation: fadeIn 1s ease-out forwards;
 }
 
 @keyframes fadeIn {
@@ -44,7 +47,7 @@ body {
 }
 
 h1 {
-    color: var(--pastel-primary-dark); /* Primary color for headings */
+    color: var(--pastel-primary-dark);
     text-align: center;
     margin-bottom: 20px;
     font-weight: 700;
@@ -71,7 +74,7 @@ textarea {
     padding: 14px;
     margin-bottom: 25px;
     border: 2px solid var(--pastel-gray-border);
-    border-radius: 12px; /* Rounded input fields */
+    border-radius: 12px;
     box-sizing: border-box;
     font-size: 16px;
     transition: border-color 0.3s ease;
@@ -80,9 +83,9 @@ textarea {
 input[type="url"]:focus,
 input[type="text"]:focus,
 textarea:focus {
-    border-color: var(--pastel-primary); /* Focus border color */
+    border-color: var(--pastel-primary);
     outline: none;
-    box-shadow: 0 0 0 2px rgba(var(--pastel-primary-rgb), 0.2); /* Optional: focus shadow */
+    box-shadow: 0 0 0 2px rgba(var(--pastel-primary-rgb), 0.2);
 }
 
 
@@ -91,8 +94,8 @@ textarea {
     min-height: 120px;
 }
 
-.primary-button, .secondary-button, .understanding-button, .feedback-button, .get-gemini-btn, .ask-btn {
-    background-color: var(--pastel-primary); /* Primary button color */
+.primary-button, .secondary-button, .understanding-button, .feedback-button, .get-gemini-btn, .ask-btn, .mark-solved-btn, .remove-student-button {
+    background-color: var(--pastel-primary);
     color: var(--pastel-text-light);
     padding: 14px 25px;
     border: none;
@@ -100,20 +103,20 @@ textarea {
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s ease, transform 0.2s ease;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.05); /* Button shadow */
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
     font-weight: bold;
     display: inline-flex;
     align-items: center;
     justify-content: center;
 }
 
-.primary-button:hover, .secondary-button:hover, .understanding-button:hover, .feedback-button:hover, .get-gemini-btn:hover, .ask-btn:hover {
-    background-color: var(--pastel-primary-dark); /* Darker primary on hover */
-    transform: scale(1.03); /* Slight scale up on hover */
+.primary-button:hover, .secondary-button:hover, .understanding-button:hover, .feedback-button:hover, .get-gemini-btn:hover, .ask-btn:hover, .mark-solved-btn:hover, .remove-student-button:hover {
+    background-color: var(--pastel-primary-dark);
+    transform: scale(1.03);
 }
 
 .secondary-button, .get-gemini-btn {
-    background-color: var(--pastel-secondary); /* Secondary button pastel color */
+    background-color: var(--pastel-secondary);
     color: var(--pastel-text-dark);
     border: 2px solid var(--pastel-primary);
 }
@@ -123,14 +126,43 @@ textarea {
     color: var(--pastel-text-light);
 }
 
+.mark-solved-btn {
+    background-color: var(--pastel-accent-green);
+}
+.mark-solved-btn:hover {
+    background-color: #6b8e23;
+}
+
+.remove-student-button {
+    background-color: #f8d7da; /* Light red background */
+    color: #721c24; /* Dark red text */
+    border: none;
+    padding: 8px 15px; /* Slightly larger padding */
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 1rem; /* Slightly larger font */
+    transition: background-color 0.2s ease;
+    margin-left: 10px;
+}
+
+.remove-student-button.small {
+    padding: 5px 10px;
+    font-size: 0.85rem;
+}
+
+
+.remove-student-button:hover {
+    background-color: #f5c6cb;
+}
+
 
 .understanding-controls {
     text-align: center;
     margin-bottom: 35px;
     display: flex;
     justify-content: center;
-    gap: 15px; /* Spacing between buttons */
-    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+    gap: 15px;
+    flex-wrap: wrap;
 }
 
 .understanding-button {
@@ -156,7 +188,7 @@ textarea {
 
 .understanding-button.yellow {
     background-color: var(--pastel-accent-yellow);
-    color: var(--pastel-text-dark); /* Dark text for yellow button */
+    color: var(--pastel-text-dark);
 }
 
 .understanding-button.red {
@@ -164,12 +196,12 @@ textarea {
 }
 
 .understanding-button.neutral {
-    background-color: #adb5bd; /* Light gray for neutral */
+    background-color: #adb5bd;
 }
 
 .chart-container {
     width: 100%;
-    height: 350px; /* Slightly taller chart */
+    height: 350px;
     margin-bottom: 40px;
     position: relative;
 }
@@ -180,19 +212,23 @@ textarea {
     left: 0;
     right: 0;
     bottom: 0;
-    border-radius: 15px; /* Rounded chart area */
+    border-radius: 15px;
 }
 
 .question {
-    background-color: var(--pastel-question-bg); /* Lighter pastel for questions */
+    background-color: var(--pastel-question-bg);
     border: 1px solid var(--pastel-gray-border);
     padding: 20px;
     margin-bottom: 20px;
     border-radius: 15px;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.03); /* Even softer question shadow */
-    animation: slideIn 0.5s ease-out forwards; /* Slide-in animation for questions */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+    animation: slideIn 0.5s ease-out forwards;
     opacity: 0;
     transform: translateY(20px);
+}
+.question.solved {
+    background-color: var(--solved-question-bg);
+    border-color: var(--solved-badge-color);
 }
 
 @keyframes slideIn {
@@ -208,8 +244,16 @@ textarea {
 
 .student-name {
     font-weight: bold;
-    color: var(--pastel-primary-dark);
+    color: var(--pastel-text-dark);
 }
+.solved-badge {
+    background-color: var(--solved-badge-color);
+    color: var(--pastel-text-light);
+    padding: 5px 10px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+}
+
 
 .question-text {
     margin: 0 0 15px 0;
@@ -217,7 +261,7 @@ textarea {
 }
 
 .answer-section {
-    background-color: var(--pastel-secondary); /* Answer section background */
+    background-color: var(--pastel-secondary);
     padding: 15px;
     border-radius: 12px;
     margin-top: 15px;
@@ -231,7 +275,7 @@ textarea {
 
 .feedback-section {
     margin-top: 15px;
-    text-align: right; /* Align feedback buttons to the right */
+    text-align: right;
 }
 
 .feedback-button {
@@ -244,11 +288,11 @@ textarea {
 }
 
 .feedback-button.satisfactory {
-    background-color: #8ac926; /* Satisfactory green */
+    background-color: #8ac926;
 }
 
 .feedback-button.unsatisfactory {
-    background-color: #ff595e; /* Unsatisfactory red */
+    background-color: #ff595e;
 }
 
 #questions-container {
@@ -264,11 +308,11 @@ textarea {
     color: #6c757d;
     margin-bottom: 10px;
     text-align: center;
-    animation: fadeInText 1.5s ease-out forwards; /* Fade-in animation for text */
-    opacity: 0; /* Initially transparent */
-    transform: translateY(-10px); /* Start slightly above */
-    animation-delay: 0.3s; /* Delay to start after container fade-in */
-    animation-fill-mode: forwards; /* Keep final state */
+    animation: fadeInText 1.5s ease-out forwards;
+    opacity: 0;
+    transform: translateY(-10px);
+    animation-delay: 0.3s;
+    animation-fill-mode: forwards;
 }
 
 @keyframes fadeInText {
@@ -280,7 +324,7 @@ textarea {
     text-align: center;
     margin-bottom: 30px;
     font-size: 1.1rem;
-    animation-delay: 0.5s; /* Delay after headings */
+    animation-delay: 0.5s;
     animation-fill-mode: forwards;
     opacity: 0;
     transform: translateY(-15px);
@@ -294,13 +338,13 @@ textarea {
     margin-top: 20px;
 }
 
-.join-container, .teacher-container, .student-container {
+.join-container, .teacher-container, .student-container, .removed-container {
     display: flex;
     flex-direction: column;
-    align-items: stretch; /* Stretch items to container width */
+    align-items: stretch;
 }
 
-.understanding-section, .class-understanding-section, .question-section, .qa-section {
+.understanding-section, .class-understanding-section, .question-section, .qa-section, .students-section {
     margin-bottom: 30px;
 }
 
@@ -308,6 +352,29 @@ header {
     text-align: center;
     margin-bottom: 30px;
 }
+.teacher-controls {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#students-list {
+    list-style: none;
+    padding: 0;
+}
+
+.student-item {
+    background-color: var(--pastel-question-bg);
+    border: 1px solid var(--pastel-gray-border);
+    padding: 10px 15px;
+    margin-bottom: 8px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
 
 /* Animations */
 .animated-answer {
@@ -339,7 +406,7 @@ header {
     }
 
     .understanding-controls {
-        flex-direction: column; /* Stack buttons on smaller screens */
+        flex-direction: column;
         align-items: center;
     }
 
@@ -350,7 +417,7 @@ header {
     }
 
     .chart-container {
-        height: 300px; /* Adjust chart height for smaller screens */
+        height: 300px;
         margin-bottom: 25px;
     }
 
@@ -359,9 +426,14 @@ header {
         margin-bottom: 15px;
         border-radius: 12px;
     }
-
+    .teacher-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+        text-align: center;
+    }
     .feedback-section {
-        text-align: center; /* Center feedback buttons on smaller screens */
+        text-align: center;
     }
 
     .feedback-button {
@@ -372,7 +444,7 @@ header {
         font-size: 0.95rem;
     }
 
-    .primary-button, .secondary-button, .understanding-button, .feedback-button, .get-gemini-btn, .ask-btn {
+    .primary-button, .secondary-button, .understanding-button, .feedback-button, .get-gemini-btn, .ask-btn, .mark-solved-btn, .remove-student-button {
         font-size: 15px;
         padding: 12px 20px;
     }

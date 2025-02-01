@@ -27,6 +27,14 @@
             </div>
         </section>
 
+        <section class="students-section">
+            <h2>Students in Classroom</h2>
+            <ul id="students-list">
+                <!-- Student list will be loaded here -->
+            </ul>
+        </section>
+
+
         <section class="questions-section">
             <h2>Student Questions</h2>
             <div id="questions-container">
@@ -86,6 +94,24 @@
             });
         }
 
+        function displayStudents(students) {
+            const studentsListContainer = document.getElementById('students-list');
+            studentsListContainer.innerHTML = ''; // Clear existing list
+            if (students.length === 0) {
+                studentsListContainer.innerHTML = "<p>No students in classroom.</p>";
+                return;
+            }
+            students.forEach(studentName => {
+                const studentLi = document.createElement('li');
+                studentLi.classList.add('student-item');
+                studentLi.innerHTML = `
+                    ${studentName} <button class="remove-student-button small" onclick="removeStudent('${classroomId}', '${studentName}')">❌ Remove</button>
+                `;
+                studentsListContainer.appendChild(studentLi);
+            });
+        }
+
+
         function displayQuestions(questions) {
             const questionsContainer = document.getElementById('questions-container');
             questionsContainer.innerHTML = ''; // Clear existing questions
@@ -96,18 +122,66 @@
             questions.forEach(question => {
                 const questionDiv = document.createElement('div');
                 questionDiv.classList.add('question');
+                if (question.teacher_solved) {
+                    questionDiv.classList.add('solved'); // Add class for solved questions
+                }
                 questionDiv.innerHTML = `
                     <div class="question-header">
                         <strong class="student-name">${question.student}:</strong>
+                        ${question.teacher_solved ? '<span class="solved-badge">Solved</span>' : ''}
+                        <button class="remove-student-button" onclick="removeStudent('${classroomId}', '${question.student}')">❌ Remove Student</button>
                     </div>
                     <p class="question-text">${question.text}</p>
                     <div id="gemini-answer-${question.id}" class="answer-section">
-                        ${question.gemini_answer ? `<p class="gemini-answer"><strong>Gemini Answer:</strong> ${question.gemini_answer}</p>` : '<button class="secondary-button get-gemini-btn" onclick="fetchGeminiAnswer(\'' + classroomId + '\', \'' + question.id + '\')">Get AI Answer</button>'}
+                        ${question.gemini_answer ? `<p class="gemini-answer"><strong>AI Answer:</strong> ${question.gemini_answer}</p>` : '<button class="secondary-button get-gemini-btn" onclick="fetchGeminiAnswer(\'' + classroomId + '\', \'' + question.id + '\')">Get AI Answer</button>'}
                     </div>
-                    ${question.answer_satisfactory ? `<p class="feedback-text"><strong>Student Feedback:</strong> ${question.answer_satisfactory}</p>` : ''}
+                    <div class="teacher-controls">
+                        ${!question.teacher_solved ? `<button class="primary-button mark-solved-btn" onclick="markQuestionSolved('${classroomId}', '${question.id}')">Mark as Solved</button>` : ''}
+                        <div id="student-feedback-display-${question.id}">
+                            ${question.answer_satisfactory ? `<p class="feedback-text"><strong>Student Feedback:</strong> ${question.answer_satisfactory === 'satisfactory' ? '✅' : '❌'}</p>` : '<p class="feedback-text"><strong>Student Feedback:</strong> Awaiting</p>'}
+                        </div>
+                    </div>
                 `;
                 questionsContainer.appendChild(questionDiv);
             });
+        }
+
+        function markQuestionSolved(classroomId, questionId) {
+            fetch(`/mark_question_solved/${classroomId}/${questionId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    console.log(`Question ${questionId} marked as solved`);
+                    fetchClassroomData(); // Refresh questions to update UI
+                } else {
+                    alert("Error marking question as solved: " + data.message);
+                }
+            });
+        }
+
+        function removeStudent(classroomId, studentName) {
+            if (confirm(`Are you sure you want to remove student ${studentName} from the classroom?`)) {
+                fetch(`/remove_student/${classroomId}/${studentName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        console.log(`Student ${studentName} removed`);
+                        fetchClassroomData(); // Refresh classroom data to update UI
+                    } else {
+                        alert("Error removing student: " + data.message);
+                    }
+                });
+            }
         }
 
 
@@ -132,6 +206,7 @@
                     if (data.status === 'success') {
                         updateUnderstandingChart(data.understanding);
                         displayQuestions(data.questions);
+                        displayStudents(data.students); // Update student list
                     } else {
                         console.error("Error fetching classroom data:", data.message);
                     }

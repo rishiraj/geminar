@@ -44,11 +44,11 @@ def generate_gemini_answer(pdf_url, question):
         model = "gemini-2.0-flash-exp"
         contents = [
             types.Content(
-            role="user",
-            parts=[
-                document1,
-                types.Part.from_text(text=question)
-            ]
+                role="user",
+                parts=[
+                    document1,
+                    types.Part.from_text(text=question)
+                ]
             )
         ]
         generate_content_config = types.GenerateContentConfig(
@@ -57,22 +57,23 @@ def generate_gemini_answer(pdf_url, question):
             max_output_tokens = 8192,
             response_modalities = ["TEXT"],
             safety_settings = [types.SafetySetting(
-            category="HARM_CATEGORY_HATE_SPEECH",
-            threshold="OFF"
+                category="HARM_CATEGORY_HATE_SPEECH",
+                threshold="OFF"
             ),types.SafetySetting(
-            category="HARM_CATEGORY_DANGEROUS_CONTENT",
-            threshold="OFF"
+                category="HARM_CATEGORY_DANGEROUS_CONTENT",
+                threshold="OFF"
             ),types.SafetySetting(
-            category="HARM_CATEGORY_SEXUALLY_EXPLICIT",
-            threshold="OFF"
+                category="HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                threshold="OFF"
             ),types.SafetySetting(
-            category="HARM_CATEGORY_HARASSMENT",
-            threshold="OFF"
+                category="HARM_CATEGORY_HARASSMENT",
+                threshold="OFF"
             )],
             system_instruction=[types.Part.from_text(text="""Answer the question based on the provided document. Be concise and helpful.""")],
         )
-        
+
         response = client.models.generate_content(model = model, contents = contents, config = generate_content_config)
+
         return response.candidates[0].content.parts[0].text
     except Exception as e:
         print(f"Gemini Error: {e}")
@@ -129,10 +130,12 @@ def student_view(classroom_id):
         return "Classroom not found."
     if 'student_name' not in session or session['classroom_id'] != classroom_id:
         return redirect(url_for("classroom", classroom_id=classroom_id))
-
-    student_name = session['student_name']
-    classroom_name = classrooms[classroom_id]["name"]
-    return render_template("student_view.html", classroom_id=classroom_id, student_name=student_name, classroom_name=classroom_name)
+    if session['student_name'] in classrooms[classroom_id]["students"]: # Check if student is still in classroom
+        student_name = session['student_name']
+        classroom_name = classrooms[classroom_id]["name"]
+        return render_template("student_view.html", classroom_id=classroom_id, student_name=student_name, classroom_name=classroom_name)
+    else:
+        return render_template("student_removed.html", classroom_name=classrooms[classroom_id]["name"]) # Show removed page
 
 
 @app.route("/update_understanding/<classroom_id>", methods=["POST"])
@@ -141,6 +144,8 @@ def update_understanding(classroom_id):
         return jsonify({"status": "error", "message": "Classroom not found."})
     if 'student_name' not in session or session['classroom_id'] != classroom_id:
         return jsonify({"status": "error", "message": "Student not logged in."})
+    if session['student_name'] not in classrooms[classroom_id]["students"]: # Check if student is still in classroom
+        return jsonify({"status": "error", "message": "Student removed from classroom."})
 
     understanding_level = request.form.get("understanding")
     student_name = session['student_name']
@@ -164,6 +169,9 @@ def ask_question(classroom_id):
         return jsonify({"status": "error", "message": "Classroom not found."})
     if 'student_name' not in session or session['classroom_id'] != classroom_id:
         return jsonify({"status": "error", "message": "Student not logged in."})
+    if session['student_name'] not in classrooms[classroom_id]["students"]: # Check if student is still in classroom
+        return jsonify({"status": "error", "message": "Student removed from classroom."})
+
 
     question_text = request.form.get("question")
     student_name = session['student_name']
@@ -175,7 +183,8 @@ def ask_question(classroom_id):
             "student": student_name,
             "text": question_text,
             "gemini_answer": None,
-            "answer_satisfactory": None
+            "answer_satisfactory": None,
+            "teacher_solved": False # Added teacher_solved field, initialized to False
         })
         return jsonify({"status": "success", "question_id": question_id})
     else:
@@ -186,6 +195,8 @@ def ask_question(classroom_id):
 def get_gemini_answer_route(classroom_id, question_id):
     if classroom_id not in classrooms:
         return jsonify({"status": "error", "message": "Classroom not found."})
+    if session['student_name'] not in classrooms[classroom_id]["students"]: # Check if student is still in classroom
+        return jsonify({"status": "error", "message": "Student removed from classroom."})
 
     question_data = next((q for q in classrooms[classroom_id]["questions"] if q["id"] == question_id), None)
     if not question_data:
@@ -203,12 +214,17 @@ def get_gemini_answer_route(classroom_id, question_id):
 
 @app.route("/rate_answer/<classroom_id>/<question_id>", methods=["POST"])
 def rate_answer(classroom_id, question_id):
+    print("rate_answer route called in backend") # Debugging in backend
     if classroom_id not in classrooms:
         return jsonify({"status": "error", "message": "Classroom not found."})
     if 'student_name' not in session or session['classroom_id'] != classroom_id:
         return jsonify({"status": "error", "message": "Student not logged in."})
+    if session['student_name'] not in classrooms[classroom_id]["students"]: # Check if student is still in classroom
+        return jsonify({"status": "error", "message": "Student removed from classroom."})
+
 
     rating = request.form.get("rating") # "satisfactory" or "unsatisfactory"
+    print(f"Rating received in backend: {rating}") # Debugging in backend
 
     question_data = next((q for q in classrooms[classroom_id]["questions"] if q["id"] == question_id), None)
     if not question_data:
@@ -216,9 +232,38 @@ def rate_answer(classroom_id, question_id):
 
     if rating in ["satisfactory", "unsatisfactory"]:
         question_data["answer_satisfactory"] = rating
-        return jsonify({"status": "success"})
+        return jsonify({"status": "success", "rating": rating}) # Return rating in JSON response
     else:
         return jsonify({"status": "error", "message": "Invalid rating."})
+
+@app.route("/mark_question_solved/<classroom_id>/<question_id>", methods=["POST"])
+def mark_question_solved(classroom_id, question_id):
+    if classroom_id not in classrooms:
+        return jsonify({"status": "error", "message": "Classroom not found."})
+
+    question_data = next((q for q in classrooms[classroom_id]["questions"] if q["id"] == question_id), None)
+    if not question_data:
+        return jsonify({"status": "error", "message": "Question not found."})
+
+    question_data["teacher_solved"] = True # Mark question as solved
+    return jsonify({"status": "success"})
+
+@app.route("/remove_student/<classroom_id>/<student_name>", methods=["POST"])
+def remove_student(classroom_id, student_name):
+    if classroom_id not in classrooms:
+        return jsonify({"status": "error", "message": "Classroom not found."})
+    if student_name not in classrooms[classroom_id]["students"]:
+        return jsonify({"status": "error", "message": "Student not in classroom."})
+
+    del classrooms[classroom_id]["students"][student_name] # Remove student from classroom
+
+    # Remove student's questions
+    updated_questions = [
+        q for q in classrooms[classroom_id]["questions"] if q["student"] != student_name
+    ]
+    classrooms[classroom_id]["questions"] = updated_questions
+
+    return jsonify({"status": "success"})
 
 
 @app.route("/get_classroom_data/<classroom_id>")
@@ -228,10 +273,12 @@ def get_classroom_data(classroom_id):
 
     understanding_counts = classrooms[classroom_id]["understanding"]
     questions_data = classrooms[classroom_id]["questions"]
+    students_list = list(classrooms[classroom_id]["students"].keys()) # Get list of students
     return jsonify({
         "status": "success",
         "understanding": understanding_counts,
-        "questions": questions_data
+        "questions": questions_data,
+        "students": students_list # Send student list
     })
 
 

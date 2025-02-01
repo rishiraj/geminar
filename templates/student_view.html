@@ -173,9 +173,9 @@
                         ${question.gemini_answer ? `<p class="gemini-answer animated-answer"><strong>AI Answer:</strong> ${question.gemini_answer}</p>` : '<button class="secondary-button get-gemini-btn" onclick="fetchGeminiAnswer(\'' + classroomId + '\', \'' + question.id + '\')">Get AI Answer</button>'}
                     </div>
                     <div id="answer-feedback-${question.id}" class="feedback-section">
-                        ${question.answer_satisfactory ? `<p class="feedback-text"><strong>Your Feedback:</strong> ${question.answer_satisfactory}</p>` : `
-                            <button class="feedback-button satisfactory" onclick="rateAnswer(\'' + classroomId + '\', \'' + question.id + '\', \'satisfactory\')">Satisfactory</button>
-                            <button class="feedback-button unsatisfactory" onclick="rateAnswer(\'' + classroomId + '\', \'' + question.id + '\', \'unsatisfactory\')">Pass to Teacher</button>
+                        ${question.answer_satisfactory ? `<p class="feedback-text"><strong>Your Feedback:</strong> ${question.answer_satisfactory === 'satisfactory' ? '✅' : '❌'}</p>` : `
+                            <button class="feedback-button satisfactory" onclick="rateAnswer('${classroomId}', '${question.id}', 'satisfactory')">Satisfactory</button>
+                            <button class="feedback-button unsatisfactory" onclick="rateAnswer('${classroomId}', '${question.id}', 'unsatisfactory')">Pass to Teacher</button>
                         `}
                     </div>
                 `;
@@ -192,8 +192,8 @@
                         answerDiv.innerHTML = `<p class="gemini-answer animated-answer"><strong>AI Answer:</strong> ${data.answer}</p>`;
                         const feedbackDiv = document.getElementById(`answer-feedback-${questionId}`);
                         feedbackDiv.innerHTML = `
-                            <button class="feedback-button satisfactory" onclick="rateAnswer(\'' + classroomId + '\', \'' + questionId + '\', \'satisfactory\')">Satisfactory</button>
-                            <button class="feedback-button unsatisfactory" onclick="rateAnswer(\'' + classroomId + '\', \'' + questionId + '\', \'unsatisfactory\')">Pass to Teacher</button>
+                            <button class="feedback-button satisfactory" onclick="rateAnswer('${classroomId}', '${questionId}', 'satisfactory')">Satisfactory</button>
+                            <button class="feedback-button unsatisfactory" onclick="rateAnswer('${classroomId}', '${questionId}', 'unsatisfactory')">Pass to Teacher</button>
                         `;
                     } else {
                         alert("Error fetching Gemini answer: " + data.message);
@@ -202,6 +202,7 @@
         }
 
         function rateAnswer(classroomId, questionId, rating) {
+            console.log("rateAnswer called with:", classroomId, questionId, rating); // Debugging line
             fetch(`/rate_answer/${classroomId}/${questionId}`, {
                 method: 'POST',
                 headers: {
@@ -209,11 +210,13 @@
                 },
                 body: `rating=${rating}`
             })
-            .then(response => response.json())
+            .then(response => response.json()) // Parse JSON response here
             .then(data => {
                 if (data.status === 'success') {
+                    console.log("Rating successful:", data.rating); // Log the rating from response
                     const feedbackDiv = document.getElementById(`answer-feedback-${questionId}`);
-                    feedbackDiv.innerHTML = `<p class="feedback-text"><strong>Your Feedback:</strong> ${rating}</p>`;
+                    feedbackDiv.innerHTML = `<p class="feedback-text"><strong>Your Feedback:</strong> ${data.rating === 'satisfactory' ? '✅' : '❌'}</p>`; // Display feedback in student view with icon
+                    fetchClassroomData(); // Refresh classroom data to update teacher view
                 } else {
                     alert("Error rating answer: " + data.message);
                 }
