@@ -1,0 +1,147 @@
+<!-- templates/teacher_view.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teacher View - {{ classroom_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</head>
+<body>
+    <div class="container teacher-container">
+        <header>
+            <h1>{{ classroom_name }}</h1>
+            <p class="classroom-id-display">Classroom ID: <strong>{{ classroom_id }}</strong></p>
+            <p class="share-link-teacher">Share this link with your students: <a href="{{ classroom_url }}">{{ classroom_url }}</a></p>
+        </header>
+
+        <section class="understanding-section">
+            <h2>Real-time Understanding</h2>
+            <div class="chart-container">
+                <canvas id="understandingChart"></canvas>
+            </div>
+        </section>
+
+        <section class="questions-section">
+            <h2>Student Questions</h2>
+            <div id="questions-container">
+                <!-- Questions will be loaded here by JavaScript -->
+            </div>
+        </section>
+    </div>
+
+    <script>
+        const classroomId = "{{ classroom_id }}";
+        let understandingChart;
+
+        function updateUnderstandingChart(understandingData) {
+            const ctx = document.getElementById('understandingChart').getContext('2d');
+            if (understandingChart) {
+                understandingChart.destroy(); // Destroy old chart to update
+            }
+            understandingChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Understanding', 'Slightly Confused', 'Not Understanding'],
+                    datasets: [{
+                        data: [
+                            understandingData.green || 0,
+                            understandingData.yellow || 0,
+                            understandingData.red || 0
+                        ],
+                        backgroundColor: ['#A7D1AB', '#F9E79F', '#F2A1A1'], // Pastel colors for chart
+                        borderWidth: 0, // No border for cleaner look
+                        hoverOffset: 4, // Add a slight offset on hover
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 14,
+                                    family: "'Nunito', sans-serif" // Apply font to legend
+                                }
+                            }
+                        },
+                        title: {
+                            display: false,
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 1000, // Animation duration
+                        easing: 'easeOutBounce' // Example easing function
+                    }
+                }
+            });
+        }
+
+        function displayQuestions(questions) {
+            const questionsContainer = document.getElementById('questions-container');
+            questionsContainer.innerHTML = ''; // Clear existing questions
+            if (questions.length === 0) {
+                questionsContainer.innerHTML = "<p class='no-questions'>No questions yet.</p>";
+                return;
+            }
+            questions.forEach(question => {
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('question');
+                questionDiv.innerHTML = `
+                    <div class="question-header">
+                        <strong class="student-name">${question.student}:</strong>
+                    </div>
+                    <p class="question-text">${question.text}</p>
+                    <div id="gemini-answer-${question.id}" class="answer-section">
+                        ${question.gemini_answer ? `<p class="gemini-answer"><strong>Gemini Answer:</strong> ${question.gemini_answer}</p>` : '<button class="secondary-button get-gemini-btn" onclick="fetchGeminiAnswer(\'' + classroomId + '\', \'' + question.id + '\')">Get AI Answer</button>'}
+                    </div>
+                    ${question.answer_satisfactory ? `<p class="feedback-text"><strong>Student Feedback:</strong> ${question.answer_satisfactory}</p>` : ''}
+                `;
+                questionsContainer.appendChild(questionDiv);
+            });
+        }
+
+
+        function fetchGeminiAnswer(classroomId, questionId) {
+            fetch(`/get_gemini_answer/${classroomId}/${questionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const answerDiv = document.getElementById(`gemini-answer-${questionId}`);
+                        answerDiv.innerHTML = `<p class="gemini-answer animated-answer"><strong>AI Answer:</strong> ${data.answer}</p>`; // Added animation class
+                    } else {
+                        alert("Error fetching Gemini answer: " + data.message);
+                    }
+                });
+        }
+
+
+        function fetchClassroomData() {
+            fetch(`/get_classroom_data/${classroomId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        updateUnderstandingChart(data.understanding);
+                        displayQuestions(data.questions);
+                    } else {
+                        console.error("Error fetching classroom data:", data.message);
+                    }
+                });
+        }
+
+        // Fetch data initially and then every 3 seconds
+        fetchClassroomData();
+        setInterval(fetchClassroomData, 3000); // Update every 3 seconds
+
+    </script>
+</body>
+</html>

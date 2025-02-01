@@ -1,0 +1,24 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Classroom</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <h1>Start Teaching Today</h1>
+        <p class="tagline">Engage your students with real-time feedback and AI-powered Q&A.</p>
+        <form method="post">
+            <label for="pdf_url">Lecture PDF URL:</label>
+            <input type="url" id="pdf_url" name="pdf_url" required placeholder="Enter the public URL of your lecture PDF">
+            <button type="submit" class="primary-button">Create Classroom</button>
+        </form>
+    </div>
+</body>
+</html>

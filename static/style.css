@@ -1,0 +1,380 @@
+/* static/style.css */
+/* Pastel Color Palette */
+:root {
+    --pastel-bg: #f8f9fa;         /* Light gray background */
+    --pastel-primary: #a7c957;     /* Muted green */
+    --pastel-primary-dark: #6a994e; /* Darker muted green for hover */
+    --pastel-secondary: #f2e8cf;   /* Light beige/cream */
+    --pastel-text-dark: #3d405b;    /* Dark text color */
+    --pastel-text-light: #ffffff;   /* Light text color */
+    --pastel-accent-yellow: #f9e79f; /* Soft yellow */
+    --pastel-accent-red: #f2a1a1;    /* Soft red */
+    --pastel-accent-green: #a7d1ab;  /* Soft green */
+    --pastel-gray-border: #dee2e6;   /* Light gray border */
+    --pastel-question-bg: #e9ecef;  /* Slightly darker background for questions */
+}
+
+body {
+    font-family: 'Nunito', sans-serif; /* Beautiful Font */
+    margin: 0;
+    padding: 0;
+    background-color: var(--pastel-bg); /* Pastel background */
+    color: var(--pastel-text-dark);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    line-height: 1.6;
+}
+
+.container {
+    background-color: var(--pastel-secondary); /* Pastel container background */
+    padding: 40px;
+    border-radius: 20px; /* Smooth Rounded Edges */
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1); /* Softer shadow */
+    width: 90%;
+    max-width: 950px;
+    margin: 30px;
+    animation: fadeIn 1s ease-out forwards; /* Fade-in animation */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+h1 {
+    color: var(--pastel-primary-dark); /* Primary color for headings */
+    text-align: center;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+h2 {
+    color: var(--pastel-primary);
+    margin-top: 25px;
+    margin-bottom: 15px;
+    font-weight: 700;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--pastel-text-dark);
+    font-weight: bold;
+}
+
+input[type="url"],
+input[type="text"],
+textarea {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 25px;
+    border: 2px solid var(--pastel-gray-border);
+    border-radius: 12px; /* Rounded input fields */
+    box-sizing: border-box;
+    font-size: 16px;
+    transition: border-color 0.3s ease;
+}
+
+input[type="url"]:focus,
+input[type="text"]:focus,
+textarea:focus {
+    border-color: var(--pastel-primary); /* Focus border color */
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(var(--pastel-primary-rgb), 0.2); /* Optional: focus shadow */
+}
+
+
+textarea {
+    resize: vertical;
+    min-height: 120px;
+}
+
+.primary-button, .secondary-button, .understanding-button, .feedback-button, .get-gemini-btn, .ask-btn {
+    background-color: var(--pastel-primary); /* Primary button color */
+    color: var(--pastel-text-light);
+    padding: 14px 25px;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05); /* Button shadow */
+    font-weight: bold;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.primary-button:hover, .secondary-button:hover, .understanding-button:hover, .feedback-button:hover, .get-gemini-btn:hover, .ask-btn:hover {
+    background-color: var(--pastel-primary-dark); /* Darker primary on hover */
+    transform: scale(1.03); /* Slight scale up on hover */
+}
+
+.secondary-button, .get-gemini-btn {
+    background-color: var(--pastel-secondary); /* Secondary button pastel color */
+    color: var(--pastel-text-dark);
+    border: 2px solid var(--pastel-primary);
+}
+
+.secondary-button:hover, .get-gemini-btn:hover {
+    background-color: var(--pastel-primary);
+    color: var(--pastel-text-light);
+}
+
+
+.understanding-controls {
+    text-align: center;
+    margin-bottom: 35px;
+    display: flex;
+    justify-content: center;
+    gap: 15px; /* Spacing between buttons */
+    flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+}
+
+.understanding-button {
+    padding: 14px 25px;
+    border-radius: 25px;
+    color: var(--pastel-text-light);
+    font-size: 16px;
+    margin: 5px;
+    opacity: 0.9;
+    transition: opacity 0.3s ease, transform 0.2s ease;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+    font-weight: bold;
+}
+
+.understanding-button:hover, .understanding-button.selected {
+    opacity: 1;
+    transform: scale(1.05);
+}
+
+.understanding-button.green {
+    background-color: var(--pastel-accent-green);
+}
+
+.understanding-button.yellow {
+    background-color: var(--pastel-accent-yellow);
+    color: var(--pastel-text-dark); /* Dark text for yellow button */
+}
+
+.understanding-button.red {
+    background-color: var(--pastel-accent-red);
+}
+
+.understanding-button.neutral {
+    background-color: #adb5bd; /* Light gray for neutral */
+}
+
+.chart-container {
+    width: 100%;
+    height: 350px; /* Slightly taller chart */
+    margin-bottom: 40px;
+    position: relative;
+}
+
+.chart-container canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 15px; /* Rounded chart area */
+}
+
+.question {
+    background-color: var(--pastel-question-bg); /* Lighter pastel for questions */
+    border: 1px solid var(--pastel-gray-border);
+    padding: 20px;
+    margin-bottom: 20px;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.03); /* Even softer question shadow */
+    animation: slideIn 0.5s ease-out forwards; /* Slide-in animation for questions */
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+@keyframes slideIn {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.question-header {
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.student-name {
+    font-weight: bold;
+    color: var(--pastel-primary-dark);
+}
+
+.question-text {
+    margin: 0 0 15px 0;
+    color: var(--pastel-text-dark);
+}
+
+.answer-section {
+    background-color: var(--pastel-secondary); /* Answer section background */
+    padding: 15px;
+    border-radius: 12px;
+    margin-top: 15px;
+    border: 1px solid var(--pastel-gray-border);
+}
+
+.gemini-answer {
+    color: var(--pastel-text-dark);
+    margin: 0;
+}
+
+.feedback-section {
+    margin-top: 15px;
+    text-align: right; /* Align feedback buttons to the right */
+}
+
+.feedback-button {
+    padding: 10px 20px;
+    border-radius: 10px;
+    color: var(--pastel-text-light);
+    font-size: 14px;
+    margin-left: 10px;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.05);
+}
+
+.feedback-button.satisfactory {
+    background-color: #8ac926; /* Satisfactory green */
+}
+
+.feedback-button.unsatisfactory {
+    background-color: #ff595e; /* Unsatisfactory red */
+}
+
+#questions-container {
+    margin-top: 30px;
+}
+
+.question-input {
+    margin-bottom: 30px;
+}
+
+.classroom-id-display, .share-link-info, .share-link-teacher, .classroom-name-display {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 10px;
+    text-align: center;
+    animation: fadeInText 1.5s ease-out forwards; /* Fade-in animation for text */
+    opacity: 0; /* Initially transparent */
+    transform: translateY(-10px); /* Start slightly above */
+    animation-delay: 0.3s; /* Delay to start after container fade-in */
+    animation-fill-mode: forwards; /* Keep final state */
+}
+
+@keyframes fadeInText {
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.tagline {
+    color: #6c757d;
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 1.1rem;
+    animation-delay: 0.5s; /* Delay after headings */
+    animation-fill-mode: forwards;
+    opacity: 0;
+    transform: translateY(-15px);
+    animation: fadeInText 1.5s ease-out forwards;
+}
+
+.no-questions {
+    color: #6c757d;
+    font-style: italic;
+    text-align: center;
+    margin-top: 20px;
+}
+
+.join-container, .teacher-container, .student-container {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch; /* Stretch items to container width */
+}
+
+.understanding-section, .class-understanding-section, .question-section, .qa-section {
+    margin-bottom: 30px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+/* Animations */
+.animated-answer {
+    animation: answerPop 0.6s ease-out forwards;
+    transform-origin: top center;
+}
+
+@keyframes answerPop {
+    0% { opacity: 0; transform: scaleY(0.8); }
+    100% { opacity: 1; transform: scaleY(1); }
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .container {
+        width: 95%;
+        padding: 30px;
+        margin: 15px;
+        border-radius: 15px;
+    }
+
+    h1 {
+        font-size: 2.2rem;
+    }
+
+    h2 {
+        font-size: 1.6rem;
+    }
+
+    .understanding-controls {
+        flex-direction: column; /* Stack buttons on smaller screens */
+        align-items: center;
+    }
+
+    .understanding-button {
+        padding: 12px 20px;
+        font-size: 15px;
+        margin: 8px;
+    }
+
+    .chart-container {
+        height: 300px; /* Adjust chart height for smaller screens */
+        margin-bottom: 25px;
+    }
+
+    .question {
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 12px;
+    }
+
+    .feedback-section {
+        text-align: center; /* Center feedback buttons on smaller screens */
+    }
+
+    .feedback-button {
+        margin: 5px;
+    }
+
+    .classroom-id-display, .share-link-info, .share-link-teacher, .classroom-name-display, .tagline {
+        font-size: 0.95rem;
+    }
+
+    .primary-button, .secondary-button, .understanding-button, .feedback-button, .get-gemini-btn, .ask-btn {
+        font-size: 15px;
+        padding: 12px 20px;
+    }
+
+}

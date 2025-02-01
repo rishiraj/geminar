@@ -1,0 +1,244 @@
+<!-- templates/student_view.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student View - {{ classroom_name }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container student-container">
+        <header>
+            <h1>Welcome, {{ student_name }}!</h1>
+            <p class="classroom-name-display">Classroom: <strong>{{ classroom_name }}</strong></p>
+        </header>
+
+        <section class="understanding-section">
+            <h2>How well are you understanding?</h2>
+            <div class="understanding-controls">
+                <button class="understanding-button green" onclick="updateUnderstanding('green')">Understanding</button>
+                <button class="understanding-button yellow" onclick="updateUnderstanding('yellow')">Slightly Confused</button>
+                <button class="understanding-button red" onclick="updateUnderstanding('red')">Not Understanding</button>
+                <button class="understanding-button neutral" onclick="updateUnderstanding('neutral')">Neutral</button>
+            </div>
+        </section>
+
+        <section class="class-understanding-section">
+            <h2>Class Understanding Levels</h2>
+            <div class="chart-container">
+                <canvas id="understandingChart"></canvas>
+            </div>
+        </section>
+
+        <section class="question-section">
+            <h2>Ask a Question</h2>
+            <div class="question-input">
+                <textarea id="questionText" placeholder="Type your question here"></textarea>
+                <button class="primary-button ask-btn" onclick="askQuestion()">Ask Question</button>
+            </div>
+        </section>
+
+        <section class="qa-section">
+            <h2>Questions & Answers</h2>
+            <div id="questions-container">
+                <!-- Questions and answers will be loaded here by JavaScript -->
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        const classroomId = "{{ classroom_id }}";
+        let understandingChart;
+
+        function updateUnderstanding(level) {
+            fetch(`/update_understanding/${classroomId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `understanding=${level}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    console.log("Understanding updated to:", level);
+                    // Provide visual feedback on button click (optional)
+                    const buttons = document.querySelectorAll('.understanding-button');
+                    buttons.forEach(btn => btn.classList.remove('selected')); // Remove previous selection
+                    document.querySelector(`.understanding-button.${level}`).classList.add('selected'); // Highlight selected button
+                } else {
+                    alert("Error updating understanding: " + data.message);
+                }
+            });
+        }
+
+        function askQuestion() {
+            const questionText = document.getElementById('questionText').value;
+            if (!questionText.trim()) {
+                alert("Please enter a question.");
+                return;
+            }
+
+            fetch(`/ask_question/${classroomId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `question=${questionText}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    document.getElementById('questionText').value = ''; // Clear input
+                    console.log("Question asked successfully, question ID:", data.question_id);
+                    // Questions will be automatically updated by the periodic fetch
+                } else {
+                    alert("Error asking question: " + data.message);
+                }
+            });
+        }
+
+
+        function updateUnderstandingChart(understandingData) {
+            const ctx = document.getElementById('understandingChart').getContext('2d');
+            if (understandingChart) {
+                understandingChart.destroy(); // Destroy old chart to update
+            }
+            understandingChart = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Understanding', 'Slightly Confused', 'Not Understanding'],
+                    datasets: [{
+                        data: [
+                            understandingData.green || 0,
+                            understandingData.yellow || 0,
+                            understandingData.red || 0
+                        ],
+                        backgroundColor: ['#A7D1AB', '#F9E79F', '#F2A1A1'], // Pastel colors
+                        borderWidth: 0,
+                        hoverOffset: 4,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: {
+                                    size: 14,
+                                    family: "'Nunito', sans-serif"
+                                }
+                            }
+                        },
+                        title: {
+                            display: false,
+                        }
+                    },
+                    animation: {
+                        animateRotate: true,
+                        animateScale: true,
+                        duration: 1000,
+                        easing: 'easeOutBounce'
+                    }
+                }
+            });
+        }
+
+
+        function displayQuestions(questions) {
+            const questionsContainer = document.getElementById('questions-container');
+            questionsContainer.innerHTML = ''; // Clear existing questions
+            if (questions.length === 0) {
+                questionsContainer.innerHTML = "<p class='no-questions'>No questions yet.</p>";
+                return;
+            }
+            questions.forEach(question => {
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('question');
+                questionDiv.innerHTML = `
+                    <div class="question-header">
+                        <strong class="student-name">${question.student}:</strong>
+                    </div>
+                    <p class="question-text">${question.text}</p>
+                    <div id="gemini-answer-${question.id}" class="answer-section">
+                        ${question.gemini_answer ? `<p class="gemini-answer animated-answer"><strong>AI Answer:</strong> ${question.gemini_answer}</p>` : '<button class="secondary-button get-gemini-btn" onclick="fetchGeminiAnswer(\'' + classroomId + '\', \'' + question.id + '\')">Get AI Answer</button>'}
+                    </div>
+                    <div id="answer-feedback-${question.id}" class="feedback-section">
+                        ${question.answer_satisfactory ? `<p class="feedback-text"><strong>Your Feedback:</strong> ${question.answer_satisfactory}</p>` : `
+                            <button class="feedback-button satisfactory" onclick="rateAnswer(\'' + classroomId + '\', \'' + question.id + '\', \'satisfactory\')">Satisfactory</button>
+                            <button class="feedback-button unsatisfactory" onclick="rateAnswer(\'' + classroomId + '\', \'' + question.id + '\', \'unsatisfactory\')">Pass to Teacher</button>
+                        `}
+                    </div>
+                `;
+                questionsContainer.appendChild(questionDiv);
+            });
+        }
+
+        function fetchGeminiAnswer(classroomId, questionId) {
+            fetch(`/get_gemini_answer/${classroomId}/${questionId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        const answerDiv = document.getElementById(`gemini-answer-${questionId}`);
+                        answerDiv.innerHTML = `<p class="gemini-answer animated-answer"><strong>AI Answer:</strong> ${data.answer}</p>`;
+                        const feedbackDiv = document.getElementById(`answer-feedback-${questionId}`);
+                        feedbackDiv.innerHTML = `
+                            <button class="feedback-button satisfactory" onclick="rateAnswer(\'' + classroomId + '\', \'' + questionId + '\', \'satisfactory\')">Satisfactory</button>
+                            <button class="feedback-button unsatisfactory" onclick="rateAnswer(\'' + classroomId + '\', \'' + questionId + '\', \'unsatisfactory\')">Pass to Teacher</button>
+                        `;
+                    } else {
+                        alert("Error fetching Gemini answer: " + data.message);
+                    }
+                });
+        }
+
+        function rateAnswer(classroomId, questionId, rating) {
+            fetch(`/rate_answer/${classroomId}/${questionId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `rating=${rating}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const feedbackDiv = document.getElementById(`answer-feedback-${questionId}`);
+                    feedbackDiv.innerHTML = `<p class="feedback-text"><strong>Your Feedback:</strong> ${rating}</p>`;
+                } else {
+                    alert("Error rating answer: " + data.message);
+                }
+            });
+        }
+
+
+        function fetchClassroomData() {
+            fetch(`/get_classroom_data/${classroomId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        updateUnderstandingChart(data.understanding);
+                        displayQuestions(data.questions);
+                    } else {
+                        console.error("Error fetching classroom data:", data.message);
+                    }
+                });
+        }
+
+        // Fetch data initially and then every 3 seconds
+        fetchClassroomData();
+        setInterval(fetchClassroomData, 3000); // Update every 3 seconds
+
+
+    </script>
+</body>
+</html>

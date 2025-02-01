@@ -1,0 +1,25 @@
+<!-- templates/classroom_join.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Classroom</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container join-container">
+        <h1>Join {{ classroom_name }}</h1>
+        <p class="classroom-id-display">Classroom ID: <strong>{{ classroom_id }}</strong></p>
+        <form method="post" action="{{ url_for('classroom', classroom_id=classroom_id) }}">
+            <label for="student_name">Your Name:</label>
+            <input type="text" id="student_name" name="student_name" required placeholder="Enter your name to join">
+            <button type="submit" class="primary-button">Join Classroom</button>
+        </form>
+        <p class="share-link-info">Having trouble joining? Share this link: <a href="{{ url_for('classroom', classroom_id=classroom_id) }}">{{ url_for('classroom', classroom_id=classroom_id, _external=True) }}</a></p>
+    </div>
+</body>
+</html>
