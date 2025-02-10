@@ -1,4 +1,4 @@
-# Geminar: Interactive Seminars with Real-time Feedback and Gemini based Q&A
+# Geminar
 
 [![Project Status](https://img.shields.io/badge/Status-Complete-brightgreen.svg)](https://github.com/rishiraj/geminar)
 [![License](https://img.shields.io/badge/License-Apache--2.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
