@@ -40,7 +40,7 @@ def generate_gemini_answer(pdf_url, question):
             mime_type="application/pdf",
         )
 
-        model = "gemini-2.0-flash-exp"
+        model = "gemini-2.0-flash-lite-preview-02-05"
         contents = [
             types.Content(
                 role="user",
